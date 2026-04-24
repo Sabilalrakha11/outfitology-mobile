@@ -121,7 +121,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       // 1. Tembak API Checkout di Laravel lu
       final response = await http.post(
-        Uri.parse("http://127.0.0.1:8000/api/checkout"), 
+        Uri.parse("http://outfit.cicd.my.id/api/checkout"), 
         headers: {
           "Accept": "application/json", 
           "Content-Type": "application/json",

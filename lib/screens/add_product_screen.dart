@@ -45,7 +45,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       // Bikin paket pengiriman khusus (Multipart) karena ada file gambar
       var request = http.MultipartRequest(
         'POST', 
-        Uri.parse("http://127.0.0.1:8000/api/my-store/products") // 🚨 PASTIIN IP LU BENER 🚨
+        Uri.parse("http://outfit.cicd.my.id/api/my-store/products") // 🚨 PASTIIN IP LU BENER 🚨
       );
 
       // Selipin Token

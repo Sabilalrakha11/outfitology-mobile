@@ -56,7 +56,7 @@ class _StoreDashboardScreenState extends State<StoreDashboardScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:8000/api/my-store/orders"), // 🚨 IP LU
+        Uri.parse("http://outfit.cicd.my.id/api/my-store/orders"), // 🚨 IP LU
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       );
       if (response.statusCode == 200) {
@@ -80,7 +80,7 @@ class _StoreDashboardScreenState extends State<StoreDashboardScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.0.104:8000/api/my-store/orders/$orderId/resi"), // 🚨 IP LU
+        Uri.parse("http://outfit.cicd.my.id/api/my-store/orders/$orderId/resi"), // 🚨 IP LU
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
         body: {"resi": resi}, // Bawa data resi
       );

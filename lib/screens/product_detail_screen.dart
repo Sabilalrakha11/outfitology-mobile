@@ -23,7 +23,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     });
 
     // 🚨 GANTI PAKAI IP LAPTOP LU YANG KEMAREN YA! (Misal: 192.168.x.x)
-    final String apiUrl = "http://127.0.0.1:8000/api/cart"; 
+    final String apiUrl = "http://outfit.cicd.my.id/api/cart"; 
 
     // Ambil Token dari memori HP
     SharedPreferences prefs = await SharedPreferences.getInstance();

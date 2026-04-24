@@ -36,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse("http://192.168.0.104:8000/api/user"), // API bawaan Laravel buat cek user
+        Uri.parse("http://outfit.cicd.my.id/api/user"), // API bawaan Laravel buat cek user
         headers: {
           "Accept": "application/json",
           "Authorization": "Bearer $token"
@@ -132,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 try {
                   final response = await http.get(
-                    Uri.parse("http://127.0.0.1:8000/api/my-store"), 
+                    Uri.parse("http://outfit.cicd.my.id/api/my-store"), 
                     headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
                   );
 

@@ -38,7 +38,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     String? token = prefs.getString('token');
     try {
       final response = await http.get(
-        Uri.parse("http://192.168.0.104:8000/api/provinces"), 
+        Uri.parse("http://outfit.cicd.my.id/api/provinces"), 
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"}
       );
       if (response.statusCode == 200) setState(() => _provinces = jsonDecode(response.body)['data']);
@@ -50,7 +50,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     String? token = prefs.getString('token');
     try {
       final response = await http.get(
-        Uri.parse("http://192.168.0.104:8000/api/cities/$provinceId"), 
+        Uri.parse("http://outfit.cicd.my.id/api/cities/$provinceId"), 
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"}
       );
       if (response.statusCode == 200) {
@@ -66,7 +66,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     try {
       // Laravel by default punya endpoint /api/user buat ngambil data user yg login
       final response = await http.get(
-        Uri.parse("http://192.168.0.104:8000/api/user"), 
+        Uri.parse("http://outfit.cicd.my.id/api/user"), 
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"}
       );
       if (response.statusCode == 200) {
@@ -100,7 +100,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://127.0.0.1:8000/api/update-alamat"), 
+        Uri.parse("http://outfit.cicd.my.id/api/update-alamat"), 
         headers: {"Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer $token"},
         body: jsonEncode({
           "province_id": _selectedProvince,

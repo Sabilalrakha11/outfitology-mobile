@@ -33,7 +33,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     try {
       // 🚨 GANTI IP ADDRESS KALO PERLU 🚨
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:8000/api/stores/${widget.storeId}/profile"),
+        Uri.parse("http://outfit.cicd.my.id/api/stores/${widget.storeId}/profile"),
         headers: {
           "Accept": "application/json",
           "Authorization": "Bearer $token" // 🔥 Ini karcisnya biar ga diusir Laravel!

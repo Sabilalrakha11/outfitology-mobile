@@ -30,7 +30,7 @@ class _CartScreenState extends State<CartScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:8000/api/cart"), // 🚨 Pastiin IP ini bener
+        Uri.parse("http://outfit.cicd.my.id/api/cart"), // 🚨 Pastiin IP ini bener
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       );
       if (response.statusCode == 200) {

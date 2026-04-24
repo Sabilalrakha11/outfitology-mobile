@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     // GANTI URL INI KALAU PAKAI CHROME JADI 127.0.0.1
-    final String apiUrl = "http://127.0.0.1:8000/api/login"; 
+    final String apiUrl = "http://outfit.cicd.my.id/api/login"; 
 
     try {
       final response = await http.post(
