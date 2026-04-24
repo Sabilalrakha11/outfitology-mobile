@@ -42,10 +42,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
     String? token = prefs.getString('token');
 
     try {
-      // Bikin paket pengiriman khusus (Multipart) karena ada file gambar
       var request = http.MultipartRequest(
         'POST', 
-        Uri.parse("http://outfit.cicd.my.id/api/my-store/products") // 🚨 PASTIIN IP LU BENER 🚨
+        Uri.parse("http://outfit.cicd.my.id/api/my-store/products")
       );
 
       // Selipin Token
@@ -53,8 +52,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       request.headers['Accept'] = 'application/json';
 
       // Masukin data teks
-      request.fields['nama'] = _namaController.text;
-      request.fields['harga'] = _hargaController.text;
       request.fields['deskripsi'] = _deskripsiController.text;
 
       // Masukin file gambar
