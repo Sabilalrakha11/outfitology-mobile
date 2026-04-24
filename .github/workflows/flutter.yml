@@ -1,31 +1,121 @@
-name: Flutter CI
+name: Build Release APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] # Biar otomatis jalan pas git push biasa
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name (contoh: 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  build-apk:
+    name: Build & Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🐦 Setup Flutter
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: 'stable' # Kunci anti-error versi
           cache: true
 
-      - name: 📦 Install Dependencies
+      - name: Flutter Pub Get
         run: flutter pub get
 
-      - name: 🏗️ Build APK
-        run: flutter build apk --release
+      - name: Build APK Release
+        run: |
+          flutter build apk \
+            --release \
+            --split-per-abi
 
-      - name: 📤 Upload APK Artifact
+      - name: Rename APKs
+        run: |
+          VERSION="${{ github.ref_name }}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "refs/heads/main" ]; then
+            VERSION="v${{ github.event.inputs.version_name || '1.0.0' }}"
+          fi
+          mkdir -p release-apk
+          for apk in build/app/outputs/flutter-apk/app-*-release.apk; do
+            ARCH=$(echo "$apk" | grep -oP '(?<=app-).*(?=-release)')
+            cp "$apk" "release-apk/outfitology-${VERSION}-${ARCH}.apk"
+          done
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: release-apks
+          path: release-apk/*.apk
+          retention-days: 30
+
+      - name: Send APK to Telegram
+        run: |
+          VERSION="${{ github.ref_name }}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "refs/heads/main" ]; then
+            VERSION="v${{ github.event.inputs.version_name || '1.0.0' }}"
+          fi
+
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          COMMIT_AUTHOR="${{ github.event.head_commit.author.name }}"
+          COMMIT_SHA="${{ github.sha }}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          BUILD_TIME=$(date '+%d %b %Y %H:%M UTC')
+
+          CAPTION="📦 *Outfitology Mobile ${VERSION}*
+
+          🔖 *Commit:* \`${SHORT_SHA}\`
+          ✍️ *Author:* ${COMMIT_AUTHOR}
+          🕐 *Build:* ${BUILD_TIME}
+
+          📝 *Changelog:*
+          \`\`\`
+          ${COMMIT_MSG}
+          \`\`\`
+          
+          📱 *Pilih APK sesuai HP kalian:*
+          - \`arm64-v8a\` → HP modern 64-bit ✅
+          - \`armeabi-v7a\` → HP lama 32-bit
+          - \`x86_64\` → Emulator PC"
+
+          for apk in release-apk/*.apk; do
+            FILENAME=$(basename "$apk")
+
+            if [[ "$FILENAME" == *"arm64-v8a"* ]]; then
+              ARCH_LABEL="arm64-v8a (Rekomendasi)"
+            elif [[ "$FILENAME" == *"armeabi-v7a"* ]]; then
+              ARCH_LABEL="armeabi-v7a (HP Lama)"
+            elif [[ "$FILENAME" == *"x86_64"* ]]; then
+              ARCH_LABEL="x86_64 (Emulator)"
+            else
+              ARCH_LABEL="Universal"
+            fi
+
+            FILE_SIZE=$(du -sh "$apk" | cut -f1)
+
+            curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument" \
+              -F "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+              -F "document=@${apk}" \
+              -F "caption=${CAPTION}
+
+              📂 *File:* \`${FILENAME}\`
+              🏗️ *Arsitektur:* ${ARCH_LABEL}
+              💾 *Ukuran:* ${FILE_SIZE}" \
+              -F "parse_mode=Markdown"
+            sleep 1
+          done
