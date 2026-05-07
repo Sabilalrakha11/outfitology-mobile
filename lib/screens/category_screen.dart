@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:outfitology/screens/wishlist_screen.dart';
 import 'dart:convert';
 import '../main.dart';
 import 'product_detail_screen.dart';
