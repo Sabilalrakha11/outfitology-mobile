@@ -22,7 +22,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       _isLoading = true;
     });
 
-    // 🚨 GANTI PAKAI IP LAPTOP LU YANG KEMAREN YA! (Misal: 192.168.x.x)
     final String apiUrl = "http://outfit.cicd.my.id/api/cart"; 
 
     // Ambil Token dari memori HP
@@ -50,8 +49,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           "qty": 1, 
         }),
       );
-
+      print("====== CEK API KERANJANG ======");
+      print("STATUS CODE: ${response.statusCode}");
+      print("JAWABAN SERVER: ${response.body}"); 
+      print("===============================");  
       final data = jsonDecode(response.body);
+      
 
       if (response.statusCode == 200) {
         if (!mounted) return;
@@ -110,7 +113,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 image: DecorationImage(
-                  image: NetworkImage(widget.product["gambar_url"] ?? 'https://via.placeholder.com/400'),
+                  image: NetworkImage('http://outfit.cicd.my.id/storage/${widget.product["gambar"]}'),
                   fit: BoxFit.cover,
                 ),
               ),

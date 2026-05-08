@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchProducts() async {
     try {
       // 🚨 GANTI IP SESUAI YANG LU PAKE SEKARANG 🚨
-      final response = await http.get(Uri.parse("http://127.0.0.1:8000/api/products"));
+      final response = await http.get(Uri.parse("http://outfit.cicd.my.id/storage/"));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(color: Colors.grey[200]),
-                                      child: Image.network(product['gambar_url'] ?? '', fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+                                      child: Image.network('http://outfit.cicd.my.id/storage/${product['gambar']}', fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
                                     ),
                                   ),
                                   const SizedBox(height: 10),

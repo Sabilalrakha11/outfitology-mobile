@@ -139,7 +139,7 @@ class _CartScreenState extends State<CartScreen> {
                               activeColor: const Color(0xFF0A192F),
                               onChanged: (val) => _toggleSelection(item['id']),
                             ),
-                            Container(width: 70, height: 70, color: Colors.grey[200], child: Image.network(product['gambar_url'] ?? '', fit: BoxFit.cover, errorBuilder: (c,e,s) => const Icon(Icons.broken_image))),
+                            Container(width: 70, height: 70, color: Colors.grey[200], child: Image.network('http://outfit.cicd.my.id/storage/${product['gambar']}', fit: BoxFit.cover, errorBuilder: (c,e,s) => const Icon(Icons.broken_image))),
                             const SizedBox(width: 15),
                             Expanded(
                               child: Column(

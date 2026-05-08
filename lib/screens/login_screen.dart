@@ -25,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    // GANTI URL INI KALAU PAKAI CHROME JADI 127.0.0.1
     final String apiUrl = "http://outfit.cicd.my.id/api/login"; 
 
     try {
