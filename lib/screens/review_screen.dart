@@ -230,7 +230,7 @@ class _WriteReviewTabState extends State<_WriteReviewTab> {
     final token = prefs.getString('token');
     try {
       final response = await http.post(
-        Uri.parse("http://outfit.cicd.my.id/api/products/${widget.productId}/reviews"),
+        Uri.parse("http://outfit.web.id/api/products/${widget.productId}/reviews"),
         headers: {"Accept": "application/json", "Content-Type": "application/json",
           "Authorization": "Bearer $token"},
         body: jsonEncode({"rating": _rating, "comment": _commentController.text}),

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; 
-import 'dart:convert'; 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../main.dart';
 import 'login_screen.dart';
-import 'order_history_screen.dart'; 
-import 'create_store_screen.dart'; 
+import 'order_history_screen.dart';
+import 'create_store_screen.dart';
 import 'store_dashboard_screen.dart';
 import 'edit_address_screen.dart';
 
-// 🔥 UBAH JADI STATEFUL WIDGET BIAR BISA UPDATE DATA 🔥
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -17,174 +17,256 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Bikin variabel buat nampung data asli
-  String _userName = "Memuat nama...";
-  String _userEmail = "Memuat email...";
+  String _name = '';
+  String _email = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData(); // Narik data pas layar dibuka
+    _fetchUser();
   }
 
-  // 🔥 FUNGSI NARIK DATA USER DARI LARAVEL 🔥
-  Future<void> _fetchUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    if (token == null) return;
-
+  Future<void> _fetchUser() async {
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) { setState(() => _isLoading = false); return; }
     try {
       final response = await http.get(
-        Uri.parse("http://outfit.cicd.my.id/api/user"), // API bawaan Laravel buat cek user
-        headers: {
-          "Accept": "application/json",
-          "Authorization": "Bearer $token"
-        },
+        Uri.parse("http://outfit.web.id/api/user"),
+        headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        setState(() {
-          _userName = data['name']; // Sesuaiin sama kolom di tabel users lu
-          _userEmail = data['email'];
-        });
+        setState(() { _name = data['name'] ?? ''; _email = data['email'] ?? ''; });
       }
-    } catch (e) {
-      print("Error narik profil: $e");
-      setState(() {
-        _userName = "Gagal memuat data";
-        _userEmail = "Gagal memuat data";
-      });
+    } catch (_) {}
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _checkStore() async {
+    showDialog(context: context, barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator(color: AppTheme.ink)));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    try {
+      final response = await http.get(
+        Uri.parse("http://outfit.cicd.my.id/api/my-store"),
+        headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+      );
+      if (!mounted) return;
+      Navigator.pop(context);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        Navigator.push(context, MaterialPageRoute(
+          builder: (_) => data['status'] == 'ada' ? const StoreDashboardScreen() : const CreateStoreScreen(),
+        ));
+      }
+    } catch (_) {
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  Future<void> _logout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Sign Out', style: AppTheme.headingBold),
+        content: Text('Are you sure you want to sign out?', style: AppTheme.bodyMedium),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false),
+              child: Text('CANCEL', style: AppTheme.labelCaps)),
+          TextButton(onPressed: () => Navigator.pop(context, true),
+              child: Text('SIGN OUT', style: AppTheme.labelCaps.copyWith(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.fog,
       appBar: AppBar(
-        title: const Text('MY PROFILE'),
-        centerTitle: true,
+        backgroundColor: AppTheme.fog,
+        title: const Text('ACCOUNT'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: RefreshIndicator(
+        onRefresh: _fetchUser,
+        color: AppTheme.ink,
+        child: ListView(
           children: [
-            // ==========================================
-            // INFO USER (UDAH DINAMIS / ASLI)
-            // ==========================================
+            // User header card
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(30),
-              color: const Color(0xFFF4F4F4),
-              child: Column(
-                children: [
-                  const CircleAvatar(radius: 40, backgroundColor: Color(0xFF0A192F), child: Icon(Icons.person, size: 40, color: Colors.white)),
-                  const SizedBox(height: 15),
-                  Text(_userName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(_userEmail, style: const TextStyle(color: Colors.grey)),
-                ],
-              ),
+              color: AppTheme.canvas,
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+              child: _isLoading
+                  ? Row(children: [
+                      const ShimmerBox(width: 56, height: 56, borderRadius: 28),
+                      const SizedBox(width: 16),
+                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        ShimmerBox(width: 120, height: 16),
+                        const SizedBox(height: 8),
+                        ShimmerBox(width: 160, height: 12),
+                      ]),
+                    ])
+                  : Row(
+                      children: [
+                        Container(
+                          width: 56, height: 56,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.ink,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              _name.isNotEmpty ? _name[0].toUpperCase() : 'U',
+                              style: AppTheme.headingBold.copyWith(color: Colors.white, fontSize: 20),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(_name, style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w700, fontSize: 16)),
+                              const SizedBox(height: 4),
+                              Text(_email, style: AppTheme.bodySmall),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
             ),
-            const SizedBox(height: 20),
-            
-            // ==========================================
-            // MENU-MENU BAWAHNYA (TETEP SAMA KAYAK KEMAREN)
-            // ==========================================
-            ListTile(
-              leading: const Icon(Icons.receipt_long, color: Colors.black87),
-              title: const Text("Pesanan Saya", style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text("Lacak barang yang kamu beli"),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const OrderHistoryScreen()));
-              },
+            const SizedBox(height: 16),
+
+            // Menu items
+            _MenuSection(
+              title: 'ORDERS',
+              items: [
+                _MenuItem(
+                  icon: Icons.receipt_long_rounded,
+                  label: 'My Orders',
+                  subtitle: 'Track your purchases',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderHistoryScreen())),
+                ),
+              ],
             ),
-            const Divider(),
-            
-            // ==========================================
-            // 🔥 MENU BARU: ALAMAT SAYA 🔥
-            // ==========================================
-            ListTile(
-              leading: const Icon(Icons.location_on_outlined, color: Colors.black87),
-              title: const Text("Alamat Saya", style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text("Atur alamat pengiriman kamu"),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const EditAddressScreen()));
-              },
+            const SizedBox(height: 12),
+            _MenuSection(
+              title: 'SETTINGS',
+              items: [
+                _MenuItem(
+                  icon: Icons.location_on_outlined,
+                  label: 'Delivery Address',
+                  subtitle: 'Manage your addresses',
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditAddressScreen())),
+                ),
+                _MenuItem(
+                  icon: Icons.storefront_rounded,
+                  label: 'My Store',
+                  subtitle: 'Manage products & orders',
+                  onTap: _checkStore,
+                ),
+              ],
             ),
-            const Divider(), // Garis pembatas
+            const SizedBox(height: 32),
 
-            ListTile(
-              leading: const Icon(Icons.storefront, color: Colors.black87),
-              title: const Text("Toko Saya", style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text("Kelola produk dan pesanan masuk"),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () async {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(child: CircularProgressIndicator(color: Color(0xFF0A192F))),
-                );
-
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                String? token = prefs.getString('token');
-
-                try {
-                  final response = await http.get(
-                    Uri.parse("http://outfit.cicd.my.id/api/my-store"), 
-                    headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
-                  );
-
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-
-                  if (response.statusCode == 200) {
-                    final data = jsonDecode(response.body);
-                    if (data['status'] == 'ada') {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const StoreDashboardScreen()));
-                    } else {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateStoreScreen()));
-                    }
-                  } else {
-                    print("Error dari API: ${response.body}");
-                  }
-                } catch (e) {
-                  if (!context.mounted) return;
-                  Navigator.pop(context);
-                  print("Error koneksi: $e");
-                }
-              },
-            ),
-            const Divider(),
-            
+            // Logout
             Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  ),
-                  onPressed: () async {
-                    // 🔥 JANGAN LUPA HAPUS TOKEN PAS LOGOUT 🔥
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                    await prefs.remove('token');
-
-                    if (!context.mounted) return;
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  },
-                  child: const Text("LOGOUT", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: GestureDetector(
+                onTap: _logout,
+                child: Container(
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(border: Border.all(color: AppTheme.mist)),
+                  child: Text('SIGN OUT', style: AppTheme.headingBold.copyWith(color: Colors.red.shade400)),
                 ),
               ),
             ),
+            const SizedBox(height: 48),
+
+            Center(child: Text('OUTFITOLOGY v1.0', style: AppTheme.bodySmall)),
+            const SizedBox(height: 16),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuSection extends StatelessWidget {
+  final String title;
+  final List<_MenuItem> items;
+  const _MenuSection({required this.title, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+          child: Text(title, style: AppTheme.labelCaps),
+        ),
+        Container(
+          color: AppTheme.canvas,
+          child: Column(
+            children: List.generate(items.length, (i) => Column(
+              children: [
+                items[i],
+                if (i < items.length - 1) const Divider(indent: 56, height: 0),
+              ],
+            )),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MenuItem extends StatelessWidget {
+  final IconData icon;
+  final String label, subtitle;
+  final VoidCallback onTap;
+
+  const _MenuItem({required this.icon, required this.label, required this.subtitle, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: AppTheme.ink),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: AppTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(subtitle, style: AppTheme.bodySmall),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.stone),
+            ],
+          ),
         ),
       ),
     );

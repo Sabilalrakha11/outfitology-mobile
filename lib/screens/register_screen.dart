@@ -34,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       var response = await http.post(
-        Uri.parse('http://outfit.cicd.my.id/api/register'), // Endpoint Laravel
+        Uri.parse('http://outfit.web.id/api/register'), // Endpoint Laravel
         headers: {
           'Accept': 'application/json',
         },

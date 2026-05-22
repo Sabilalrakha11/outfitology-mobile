@@ -25,17 +25,25 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    final String apiUrl = "http://outfit.cicd.my.id/api/login"; 
+    final String apiUrl = "http://outfit.web.id/api/login"; 
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json", // INI KUNCI UTAMANYA CUY!
+        },
         body: jsonEncode({
           "email": _emailController.text,
           "password": _passwordController.text,
         }),
       );
+
+      print("=== CEK ERROR LOGIN ===");
+      print("STATUS: ${response.statusCode}");
+      print("BODY: ${response.body}");
+      // =========================
 
       final data = jsonDecode(response.body);
 
