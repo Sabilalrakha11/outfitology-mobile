@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final token = prefs.getString('token');
     try {
       final response = await http.get(
-        Uri.parse("http://outfit.cicd.my.id/api/my-store"),
+        Uri.parse("http://outfit.web.id/api/my-store"),
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       );
       if (!mounted) return;

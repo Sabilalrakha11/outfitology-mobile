@@ -30,7 +30,7 @@ class _CartScreenState extends State<CartScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse("http://outfit.cicd.my.id/api/cart"), // 🚨 Pastiin IP ini bener
+        Uri.parse("http://outfit.web.id/api/cart"), // 🚨 Pastiin IP ini bener
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       );
       if (response.statusCode == 200) {
@@ -139,7 +139,7 @@ class _CartScreenState extends State<CartScreen> {
                               activeColor: const Color(0xFF0A192F),
                               onChanged: (val) => _toggleSelection(item['id']),
                             ),
-                            Container(width: 70, height: 70, color: Colors.grey[200], child: Image.network('http://outfit.cicd.my.id/storage/${product['gambar']}', fit: BoxFit.cover, errorBuilder: (c,e,s) => const Icon(Icons.broken_image))),
+                            Container(width: 70, height: 70, color: Colors.grey[200], child: Image.network('http://outfit.web.id/storage/${product['gambar']}', fit: BoxFit.cover, errorBuilder: (c,e,s) => const Icon(Icons.broken_image))),
                             const SizedBox(width: 15),
                             Expanded(
                               child: Column(

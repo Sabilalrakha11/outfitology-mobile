@@ -44,7 +44,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     try {
       var request = http.MultipartRequest(
         'POST', 
-        Uri.parse("http://outfit.cicd.my.id/api/my-store/products")
+        Uri.parse("http://outfit.web.my.id/api/my-store/products")
       );
 
       // Selipin Token

@@ -22,7 +22,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       _isLoading = true;
     });
 
-    final String apiUrl = "http://outfit.cicd.my.id/api/cart"; 
+    final String apiUrl = "http://outfit.web.my.id/api/cart"; 
 
     // Ambil Token dari memori HP
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -113,7 +113,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 image: DecorationImage(
-                  image: NetworkImage('http://outfit.cicd.my.id/storage/${widget.product["gambar"]}'),
+                  image: NetworkImage('http://outfit.web.id/storage/${widget.product["gambar"]}'),
                   fit: BoxFit.cover,
                 ),
               ),

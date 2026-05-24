@@ -61,7 +61,7 @@ class _CategoryScreenState extends State<CategoryScreen> with TickerProviderStat
     setState(() { _isLoading = true; _hasError = false; });
     try {
       // Build URL dengan query param kategori
-      String url = "http://outfit.cicd.my.id/api/products";
+      String url = "http://outfit.web.id/api/products";
       final params = <String, String>{};
       if (_selectedCategory != 'all') params['kategori'] = _selectedCategory;
       // Sort
