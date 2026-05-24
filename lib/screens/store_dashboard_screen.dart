@@ -80,7 +80,7 @@ class _StoreDashboardScreenState extends State<StoreDashboardScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://outfit.web.id/api/my-store/orders/$orderId/resi"), // 🚨 IP LU
+        Uri.parse("http://outfitku.web.id/api/my-store/orders/$orderId/resi"), // 🚨 IP LU
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
         body: {"resi": resi}, // Bawa data resi
       );

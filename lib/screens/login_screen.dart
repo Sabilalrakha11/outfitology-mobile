@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    final String apiUrl = "http://outfit.web.id/api/login"; 
+    final String apiUrl = "http://outfitku.web.id/api/login"; 
 
     try {
       final response = await http.post(

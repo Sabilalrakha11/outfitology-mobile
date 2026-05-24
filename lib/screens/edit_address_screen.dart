@@ -100,7 +100,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("http://outfit.web.id/api/update-alamat"), 
+        Uri.parse("http://outfitku.web.id/api/update-alamat"), 
         headers: {"Accept": "application/json", "Content-Type": "application/json", "Authorization": "Bearer $token"},
         body: jsonEncode({
           "province_id": _selectedProvince,

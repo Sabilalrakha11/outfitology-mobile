@@ -75,7 +75,7 @@ class _SearchScreenState extends State<SearchScreen> {
     await _saveRecent(query.trim());
     try {
       final response = await http.get(
-        Uri.parse("http://outfit.web.id/api/products?search=${Uri.encodeComponent(query)}"),
+        Uri.parse("http://outfitku.web.id/api/products?search=${Uri.encodeComponent(query)}"),
         headers: {"Accept": "application/json"},
       );
       if (response.statusCode == 200) {

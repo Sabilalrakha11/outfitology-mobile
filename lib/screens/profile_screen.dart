@@ -34,7 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (token == null) { setState(() => _isLoading = false); return; }
     try {
       final response = await http.get(
-        Uri.parse("http://outfit.web.id/api/user"),
+        Uri.parse("http://outfitku.web.id/api/user"),
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       );
       if (response.statusCode == 200) {
@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final token = prefs.getString('token');
     try {
       final response = await http.get(
-        Uri.parse("http://outfit.web.id/api/my-store"),
+        Uri.parse("http://outfitku.web.id/api/my-store"),
         headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
       );
       if (!mounted) return;

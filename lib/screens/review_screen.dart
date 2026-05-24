@@ -36,7 +36,7 @@ class _ReviewScreenState extends State<ReviewScreen> with SingleTickerProviderSt
     setState(() => _isLoading = true);
     try {
       final response = await http.get(
-        Uri.parse("http://outfit.web.my.id/api/products/${widget.productId}/reviews"),
+        Uri.parse("http://outfitku.web.my.id/api/products/${widget.productId}/reviews"),
         headers: {"Accept": "application/json"},
       );
       if (response.statusCode == 200) {
