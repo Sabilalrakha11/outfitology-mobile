@@ -8,6 +8,7 @@ import 'order_history_screen.dart';
 import 'create_store_screen.dart';
 import 'store_dashboard_screen.dart';
 import 'edit_address_screen.dart';
+import 'config/api_config.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -28,43 +29,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _fetchUser() async {
-    setState(() => _isLoading = true);
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) { setState(() => _isLoading = false); return; }
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final response = await http.get(
-        Uri.parse("http://outfitku.web.id/api/user"),
-        headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+        // INI YANG PALING PENTING, WAJIB PAKAI ApiConfig.baseUrl
+        Uri.parse('${ApiConfig.baseUrl}/user'), 
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
+
+      // ... sisa kodingan setState nampilin nama & email ...
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        setState(() { _name = data['name'] ?? ''; _email = data['email'] ?? ''; });
+        setState(() {
+          // Sesuaikan dengan variabel di kodingan kamu (misal _name atau _userName)
+          // _name = data['name']; 
+        });
       }
-    } catch (_) {}
-    setState(() => _isLoading = false);
+    } catch (e) {
+      print("Error fetch user: $e");
+    }
   }
 
   Future<void> _checkStore() async {
-    showDialog(context: context, barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator(color: AppTheme.ink)));
+    showDialog(
+      context: context, 
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()) // Sesuaikan warna loadingnya kalau error
+    );
+    
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
+
     try {
       final response = await http.get(
-        Uri.parse("http://outfitku.web.id/api/my-store"),
-        headers: {"Accept": "application/json", "Authorization": "Bearer $token"},
+        // PAKAI ApiConfig BIAR OTOMATIS HTTPS SESUAI FILE CONFIG KAMU
+        Uri.parse("${ApiConfig.baseUrl}/my-store"),
+        headers: {
+          "Accept": "application/json", 
+          "Authorization": "Bearer $token"
+        },
       );
+
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context); // Tutup loading muter-muter
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         Navigator.push(context, MaterialPageRoute(
           builder: (_) => data['status'] == 'ada' ? const StoreDashboardScreen() : const CreateStoreScreen(),
         ));
+      } else {
+        // Biar nggak "diem" aja kalau ada error dari server
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal memuat toko (Error ${response.statusCode})"), backgroundColor: Colors.red),
+        );
       }
-    } catch (_) {
-      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Tutup loading kalau error jaringan
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Terjadi kesalahan jaringan"), backgroundColor: Colors.red),
+      );
     }
   }
 

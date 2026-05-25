@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'config/api_config.dart'; // Pastikan path ini bener ya cuy
+import 'config/api_config.dart'; 
 
 class CreateStoreScreen extends StatefulWidget {
   const CreateStoreScreen({super.key});
@@ -30,7 +30,6 @@ class _CreateStoreScreenState extends State<CreateStoreScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
 
-      // Sesuaikan URL '/toko/register' dengan route API Laravel kamu
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/buka-toko"),
         headers: {
@@ -44,23 +43,44 @@ class _CreateStoreScreenState extends State<CreateStoreScreen> {
         }),
       );
 
-      final data = jsonDecode(response.body);
+      print('=== CEK API BUKA TOKO ===');
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
 
+      // CEK STATUS DULU SEBELUM DI-DECODE BIAR GAK CRASH
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Berhasil daftar! Menunggu persetujuan Super Admin."), backgroundColor: Colors.green),
         );
-        Navigator.pop(context); // Balik ke halaman sebelumnya
+        Navigator.pop(context); 
       } else {
         if (!mounted) return;
+        
+        // Coba tangkap pesan error dari server kalau bentuknya JSON
+        String errorMsg = "Gagal mendaftar toko (Error ${response.statusCode})";
+        try {
+          final data = jsonDecode(response.body);
+          errorMsg = data['message'] ?? errorMsg;
+        } catch (_) {
+          // Kalau server ngirim HTML (bukan JSON), tampilkan pesan default
+          errorMsg = "Terjadi masalah di server (Error ${response.statusCode})";
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "Gagal mendaftar toko"), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.orange),
         );
       }
     } catch (e) {
+      print('=== INI ERROR ASLINYA CUY ===');
+      print(e.toString());
+      
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Terjadi kesalahan jaringan"), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text("Terjadi kesalahan jaringan atau server tidak merespon"), 
+          backgroundColor: Colors.red
+        ),
       );
     } finally {
       if (mounted) setState(() { _isLoading = false; });
@@ -93,7 +113,7 @@ class _CreateStoreScreenState extends State<CreateStoreScreen> {
             TextField(
               controller: _namaTokoController,
               decoration: InputDecoration(
-                hintText: "Contoh: Reza Store",
+                hintText: "Contoh: Outfit Store",
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               ),
